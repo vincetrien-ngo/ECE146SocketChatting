@@ -78,6 +78,7 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 #print("\U0001F602")  prints out an emoji
 
 host = '98.242.60.126'
+#host = socket.gethostname()
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)
