@@ -61,7 +61,7 @@ scrollbarY.pack(side=RIGHT, fill=Y)
 msg_list.pack(side=LEFT, fill=BOTH)
 messages_frame.pack()
 
-sendPNG = PhotoImage(file = 'forward.png')
+#sendPNG = PhotoImage(file = 'forward.png')
 send_button = Button(top, text="Send", bg = "#6699ff", fg = "white", command=send)#button used to send text
 #send_button = Button(top, image = sendPNG, command=send)#button used to send text
 send_button.place(x=24, y=450, height = 19)#place the button at specified x and y
@@ -77,8 +77,8 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 #-------------------------------------------------------------------------------------
 #print("\U0001F602")  prints out an emoji
 
-host = '98.242.60.126'
-#host = socket.gethostname()
+#host = '98.242.60.126'
+host = socket.gethostname()
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)
