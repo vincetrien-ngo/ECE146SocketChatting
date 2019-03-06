@@ -77,8 +77,7 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 #-------------------------------------------------------------------------------------
 #print("\U0001F602")  prints out an emoji
 
-#host = '98.242.60.126'
-host = socket.gethostname()
+host = '98.242.60.126' #router that was hosting the server IP (Hannsels Comcast)
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)
