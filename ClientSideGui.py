@@ -15,10 +15,6 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
         QtWidgets.QWidget.__init__(self,parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        """self.workerThread = WorkerThread()
-        self.workerThread.start()
-        self.sendThread = senderThread()
-        self.sendThread.start()"""
         print('prelogin button pressed')
         self.ui.REGISTER.clicked.connect(self.openRegistration)
         self.ui.LOGIN.clicked.connect(self.loginCheck)
@@ -44,28 +40,25 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
             Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
         else:
             send("2")#invoke command number 2 to prompt the server for registration
-            time.sleep(0.5)
+            time.sleep(0.3)
             send(inputUser)
-            time.sleep(0.5)
+            time.sleep(0.3)
             send(inputPass)
             serverResponse = client_socket.recv(BUFSIZ).decode("utf8")
 
             if serverResponse == "Success":
-                print(serverResponse)
                 Rsuccess.show()
                 myRegi.ui.lineEdit.clear()#clear username input text box
                 myRegi.ui.lineEdit_2.clear()#clear password input text box
                 myRegi.ui.lineEdit_3.clear()#clear confirm password text box
                 Rsuccess.success.loginSuccessButton.clicked.connect(self.returnToLogin)
             elif serverResponse == "Username Taken!":
-                print(serverResponse)
                 Rerror.show()
                 myRegi.ui.lineEdit.clear()#clear username input text box
                 myRegi.ui.lineEdit_2.clear()#clear password input text box
                 myRegi.ui.lineEdit_3.clear()#clear confirm password text box
                 Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
             else:
-                print(serverResponse)
                 Rerror.show()
                 myRegi.ui.lineEdit.clear()#clear username input text box
                 myRegi.ui.lineEdit_2.clear()#clear password input text box
@@ -79,17 +72,15 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
         password = self.ui.lineEdit.text()
         send("1")#signals a login attempt to the server
         send(username)
-        time.sleep(0.5)
+        time.sleep(0.3)
         send(password)
-        time.sleep(0.5)
+        time.sleep(0.3)
         receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
 
         if receiveMes == "Success":
-            print('reached here success')
             mySuccess.show()#make the object active on the screen
             mySuccess.su.loginSuccessButton.clicked.connect(self.appInitialize)
         else:
-            print('reached here error')
             myError.show()
             self.ui.lineEdit.clear()
             self.ui.UNbox.clear()
@@ -109,36 +100,21 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
         mySuccess.close()#will not be needed anymore
         myapp.close()#will not be needed anymore
 
+        self.receiveMessages = receiverThread()
+        self.receiveMessages.start()#start thread to receive messages in psuedo parallel to running the gui
+
         myChat.mainChat.sendMessage_Button.clicked.connect(self.sendMessage)
 
     def sendMessage(self):#Sends message to server and server then displays it in the global chat
         messageToSend = myChat.mainChat.sendMessage_LineEdit.text()
-        myChat.mainChat.textBrowser.append(messageToSend)
+        myChat.mainChat.sendMessage_LineEdit.clear()
         send(messageToSend,None)
 
 def send(msg, event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))#send the user input to server for handling
     if msg == "{exit}":#typing {exit} will cause client to exit
         client_socket.close()#close the socket connection
-
-def receive():
-    if haveLoggedIn:
-        while True:
-            try:
-                msg = client_socket.recv(BUFSIZ).decode("utf8")#recieve messages handled by server
-                myChat.mainChat.textBrowser.append(msg)
-            except OSError:  # Possibly client has left the chat.
-                break
-    else:
-        print('im here')
-        while not haveLoggedIn:
-            username = myapp.ui.UNbox.text()
-            password = myapp.ui.lineEdit.text()
-            send(username)
-            send(password)
-            if client_socket.recv(BUFSIZ).decode("utf8") == "Success":
-                haveLoggedIn = True
-                receive()
+        myChat.close()
 
 
 #***********************************************************************************************************************
@@ -185,32 +161,19 @@ class mainChat(QtWidgets.QMainWindow):#class used to create the main chat widget
         self.mainChat = Ui_MainWindow()
         self.mainChat.setupUi(self)
 
-class WorkerThread(QThread):
+class receiverThread(QThread):
     def __init__(self, parent=None):
-        super(WorkerThread,self).__init__(parent)
+        super(receiverThread,self).__init__(parent)
 
     def run(self):
         while True:
-            print("this is running still")
-            time.sleep(2)
-
-class senderThread(QThread):
-    def __init__(self, parent=None):
-        super(senderThread,self).__init__(parent)
-
-    def run(self):
-        while True:
-            print("this happens also")
-            time.sleep(0.5)
+            try:
+                msg = client_socket.recv(BUFSIZ).decode("utf8")#recieve messages handled by server
+                myChat.mainChat.textBrowser.append(msg)#append to chat box
+            except OSError:  # Possibly client has left the chat.
+                break
 ##----------------------------------------------------------------------------------------------------------------------
 ##SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER AND CREATE THREADS
-##----------------------------------------------------------------------------------------------------------------------
-def on_closing(event=None):
-    my_msg.set("{exit}")
-    send()
-
-##----------------------------------------------------------------------------------------------------------------------
-##GUI SECTION OF THE PROGRAM TO INITIALIZE DIFFERENT GUI OBJECTS BEFORE HAVING TO DISPLAY THEM LATER IN THE PROGRAM
 ##----------------------------------------------------------------------------------------------------------------------
 global haveLoggedIn
 haveLoggedIn = False
@@ -222,7 +185,9 @@ ADDR = (host, port)
 client_socket = socket(AF_INET, SOCK_STREAM)
 client_socket.connect(ADDR)
 
-
+##----------------------------------------------------------------------------------------------------------------------
+##GUI SECTION OF THE PROGRAM TO INITIALIZE DIFFERENT GUI OBJECTS BEFORE HAVING TO DISPLAY THEM LATER IN THE PROGRAM
+##----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":#Main program execution starts here
     app = QtWidgets.QApplication(sys.argv)
     myapp = myWin()
