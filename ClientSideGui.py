@@ -36,27 +36,52 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
         inputPass = myRegi.ui.lineEdit_2.text()#retrieve text from password textbox
         confirmPass = myRegi.ui.lineEdit_3.text()#retrive text from confirm password textbox
 
-        if(inputPass != confirmPass):
+        if(inputPass != confirmPass or inputPass == "" or inputUser == "" or confirmPass == ""):
             Rerror.show()
+            myRegi.ui.lineEdit.clear()#clear username
             myRegi.ui.lineEdit_2.clear()#clear password inputs
             myRegi.ui.lineEdit_3.clear()#clear password inputs
             Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
         else:
-            Rsuccess.show()
-            updateTable(inputUser,inputPass)#add user to database
-            myRegi.ui.lineEdit.clear()#clear username input text box
-            myRegi.ui.lineEdit_2.clear()#clear password input text box
-            myRegi.ui.lineEdit_3.clear()#clear confirm password text box
-            Rsuccess.success.loginSuccessButton.clicked.connect(self.returnToLogin)
+            send("2")#invoke command number 2 to prompt the server for registration
+            time.sleep(0.5)
+            send(inputUser)
+            time.sleep(0.5)
+            send(inputPass)
+            serverResponse = client_socket.recv(BUFSIZ).decode("utf8")
+
+            if serverResponse == "Success":
+                print(serverResponse)
+                Rsuccess.show()
+                myRegi.ui.lineEdit.clear()#clear username input text box
+                myRegi.ui.lineEdit_2.clear()#clear password input text box
+                myRegi.ui.lineEdit_3.clear()#clear confirm password text box
+                Rsuccess.success.loginSuccessButton.clicked.connect(self.returnToLogin)
+            elif serverResponse == "Username Taken!":
+                print(serverResponse)
+                Rerror.show()
+                myRegi.ui.lineEdit.clear()#clear username input text box
+                myRegi.ui.lineEdit_2.clear()#clear password input text box
+                myRegi.ui.lineEdit_3.clear()#clear confirm password text box
+                Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
+            else:
+                print(serverResponse)
+                Rerror.show()
+                myRegi.ui.lineEdit.clear()#clear username input text box
+                myRegi.ui.lineEdit_2.clear()#clear password input text box
+                myRegi.ui.lineEdit_3.clear()#clear confirm password text box
+                Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
+
+
 
     def loginCheck(self):
         username = self.ui.UNbox.text()
         password = self.ui.lineEdit.text()
         send("1")#signals a login attempt to the server
         send(username)
-        time.sleep(1)
+        time.sleep(0.5)
         send(password)
-        time.sleep(1)
+        time.sleep(0.5)
         receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
 
         if receiveMes == "Success":
