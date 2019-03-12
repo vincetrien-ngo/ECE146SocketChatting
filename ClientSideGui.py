@@ -15,7 +15,6 @@ class myWin(QtWidgets.QMainWindow):#class to create and use objects pertaining t
         QtWidgets.QWidget.__init__(self,parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
-        print('prelogin button pressed')
         self.ui.REGISTER.clicked.connect(self.openRegistration)
         self.ui.LOGIN.clicked.connect(self.loginCheck)
 

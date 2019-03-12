@@ -13,19 +13,11 @@ def updateTable(username,password):#function to add users into server database
     userInfo.commit()
     userInfo.close()
 
-def checkTable(username, password):
+def checkTable(username,password):#function to verify user is registered in the server
     userInfo = sqlite3.connect("login.db")
-    result = userInfo.execute("SELECT * FROM USERS WHERE USERNAME = ? AND PASSWORD = ?",(username, password))
+    result = connection.execute("SELECT * FROM USERS WHERE USERNAME = ? AND PASSWORD = ?",(username, password))
+
     if(len(result.fetchall()) > 0):
         return True
     else:
         return False
-
-def checkUserName(username):
-    userInfo = sqlite3.connect("login.db")
-    result = userInfo.execute("SELECT * FROM USERS WHERE USERNAME = ?", (username,))
-    if(len(result.fetchall()) > 0):
-        return True
-    else:
-        return False
-

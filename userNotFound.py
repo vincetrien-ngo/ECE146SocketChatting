@@ -294,5 +294,6 @@ class Ui_userNotFoundForm(object):
     def retranslateUi(self, userNotFoundForm):
         _translate = QtCore.QCoreApplication.translate
         userNotFoundForm.setWindowTitle(_translate("userNotFoundForm", "ERROR"))
+        userNotFoundForm.setWindowIcon(QtGui.QIcon('bigUgo.png'))
         self.userNotFoundButton.setText(_translate("userNotFoundForm", "OK"))
         self.userNotFoundLabel.setText(_translate("userNotFoundForm", "User Not Found!"))

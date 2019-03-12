@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import*
 
 class Ui_registrationWindow(object):
     def setupUi(self, registrationWindow):
@@ -219,6 +220,9 @@ class Ui_registrationWindow(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Base, brush)
         self.lineEdit_2.setPalette(palette)
+        #######
+        self.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password)
+        ##########
         self.lineEdit_2.setObjectName("lineEdit_2")
         self.chooseUsername = QtWidgets.QLabel(registrationWindow)
         self.chooseUsername.setGeometry(QtCore.QRect(30, 30, 131, 21))
@@ -284,6 +288,7 @@ class Ui_registrationWindow(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.Base, brush)
         self.lineEdit_3.setPalette(palette)
+        self.lineEdit_3.setEchoMode(QtWidgets.QLineEdit.Password)
         self.lineEdit_3.setObjectName("lineEdit_3")
         self.confirmPassword = QtWidgets.QLabel(registrationWindow)
         self.confirmPassword.setGeometry(QtCore.QRect(30, 90, 121, 21))

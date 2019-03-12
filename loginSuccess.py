@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import *
 
 class Ui_loginSuccess(object):
     def setupUi(self, loginSuccess):
@@ -297,5 +298,6 @@ class Ui_loginSuccess(object):
     def retranslateUi(self, loginSuccess):
         _translate = QtCore.QCoreApplication.translate
         loginSuccess.setWindowTitle(_translate("loginSuccess", "Welcome"))
+        loginSuccess.setWindowIcon(QIcon('bigUgo.png'))
         self.loginSuccessButton.setText(_translate("loginSuccess", "OK"))
         self.loginSuccessLabel.setText(_translate("loginSuccess", "Login Successful!"))

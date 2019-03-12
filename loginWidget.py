@@ -242,6 +242,10 @@ class Ui_Form(object):
         brush.setStyle(QtCore.Qt.SolidPattern)
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.NoRole, brush)
         self.lineEdit.setPalette(palette)
+        #####
+        self.lineEdit.setInputMethodHints(QtCore.Qt.ImhHiddenText|QtCore.Qt.ImhNoAutoUppercase|QtCore.Qt.ImhNoPredictiveText|QtCore.Qt.ImhSensitiveData)
+        self.lineEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+        #####
         self.lineEdit.setObjectName("lineEdit")
         self.UNLabel = QtWidgets.QLabel(Form)
         self.UNLabel.setGeometry(QtCore.QRect(60, 40, 81, 21))
@@ -430,6 +434,7 @@ class Ui_Form(object):
    def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Ugo Chat: For Engineers, By Engineers!"))
+        Form.setWindowIcon(QtGui.QIcon('bigUgo.png'))
         self.REGISTER.setText(_translate("Form", "REGISTER"))
         self.LOGIN.setText(_translate("Form", "LOGIN"))
         self.UNLabel.setText(_translate("Form", "Username:"))
