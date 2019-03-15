@@ -54,8 +54,6 @@ def handleClient(client):#handle client interaction
                 cmdNum = ""
     
     time.sleep(1)
-    msg = "%s has joined the chat!" % name
-    broadcast(bytes(msg, "utf8"))#Notify all other users of new client
     clients[client] = name#Store the clients selected name
     while True:#loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)#receive message from client
