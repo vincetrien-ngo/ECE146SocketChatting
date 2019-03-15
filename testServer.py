@@ -1,3 +1,4 @@
+
 import socket, time, signal
 from userDatabase import updateTable
 from userDatabase import checkTable
@@ -55,7 +56,7 @@ def handleClient(client):#handle client interaction
     
     time.sleep(1)
     msg = "%s has joined the chat!" % name
-    broadcast(bytes(msg, "utf8"))#Notify all other users of new client
+    #broadcast(bytes(msg, "utf8"))#Notify all other users of new client
     clients[client] = name#Store the clients selected name
     while True:#loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)#receive message from client
@@ -64,7 +65,7 @@ def handleClient(client):#handle client interaction
         else:#user wishes to disconnect
             client.close()#remove clients socket connection
             del clients[client]#delete client from list of clients
-            broadcast(bytes("%s has left the chat." % name, "utf8"))#broadcast exit
+            #broadcast(bytes("%s has left the chat." % name, "utf8"))#broadcast exit
             break#end of while loop
 
 def broadcast(msg, prefix=""):#handles the broadcasting of messages to all users
