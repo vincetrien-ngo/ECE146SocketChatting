@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import*
 
+
 class Ui_registrationWindow(object):
     def setupUi(self, registrationWindow):
         registrationWindow.setObjectName("registrationWindow")

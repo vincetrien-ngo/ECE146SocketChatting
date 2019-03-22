@@ -2,13 +2,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import sqlite3
 from registrationPage import Ui_registrationWindow
 
+
 class Ui_Form(object):
    def setupUi(self, Form):
         Form.setObjectName("Ugo Chat: For engineers, by engineers!")
         Form.resize(300, 200)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        #sizePolicy.setHorizontalStretch(0)
-        #sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
         Form.setMinimumSize(QtCore.QSize(300, 200))

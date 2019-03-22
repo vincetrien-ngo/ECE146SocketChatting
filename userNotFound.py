@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_userNotFoundForm(object):
     def setupUi(self, userNotFoundForm):
         userNotFoundForm.setObjectName("userNotFoundForm")
