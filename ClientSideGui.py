@@ -110,7 +110,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
 
 def send(msg, event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))  # send the user input to server for handling
-    if msg == "{exit}":  # typing {exit} will cause client to exit
+    if msg == "//exit":  # typing {exit} will cause client to exit
         client_socket.close()  # close the socket connection
         myChat.close()
 
