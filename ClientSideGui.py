@@ -76,6 +76,15 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
 
         if receiveMes == "Success":
+            friends = QStandardItemModel(myChat.mainChat.listView)
+            while receiveMes != "FINISHED":  # populate friends list from servers database
+                receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
+                if receiveMes != "FINISHED":
+                    friend = QStandardItem(QtGui.QIcon('userOnline.png'), receiveMes)###############TESTING
+                    friends.appendRow(friend)
+                time.sleep(0.2)
+
+            myChat.mainChat.listView.setModel(friends)  # Display friends on side column
             mySuccess.show()  # make the object active on the screen
             mySuccess.su.loginSuccessButton.clicked.connect(self.appInitialize)
         else:
@@ -110,7 +119,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
 
 def send(msg, event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))  # send the user input to server for handling
-    if msg == "{exit}":  # typing {exit} will cause client to exit
+    if msg == "//exit":  # typing //exit will cause client to exit
         client_socket.close()  # close the socket connection
         myChat.close()
 
@@ -164,7 +173,6 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
         self.mainChat = Ui_MainWindow()
         self.mainChat.setupUi(self)
 
-
 class receiverThread(QThread):
     def __init__(self, parent=None):
         super(receiverThread, self).__init__(parent)
@@ -177,13 +185,12 @@ class receiverThread(QThread):
             except OSError:  # Possibly client has left the chat.
                 break
 # ----------------------------------------------------------------------------------------------------------------------
-# SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER AND CREATE THREADS
+# SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER
 # ----------------------------------------------------------------------------------------------------------------------
 
 
 global haveLoggedIn
 haveLoggedIn = False
-# host = '192.168.0.44'
 host = '73.235.230.212'
 port = 50000
 BUFSIZ = 1024
@@ -206,3 +213,6 @@ if __name__ == "__main__":  # Main program execution starts here
     myChat = mainChat()
     myapp.show()
     sys.exit(app.exec_())
+
+  #  User by Luis Prado from the Noun Project (ugo chat online/ offline icon)
+  #  User by Wilson Joseph from the Noun Project(message received)
