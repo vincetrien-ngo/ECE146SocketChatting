@@ -63,8 +63,6 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
                 myRegi.ui.lineEdit_3.clear()  # clear confirm password text box
                 Rerror.error.userNotFoundButton.clicked.connect(self.openRegistration)
 
-
-
     def loginCheck(self):
         username = self.ui.UNbox.text()
         password = self.ui.lineEdit.text()
@@ -169,7 +167,6 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
         client_socket.close()  # close the socket connection
         myChat.close()
         exit()
-
 
 
 class receiverThread(QThread):

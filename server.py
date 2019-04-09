@@ -72,7 +72,6 @@ def handleClient(client):  # handle client interaction
             break  # end of while loop
 
 
-
 def broadcast(msg, prefix=""):  # handles the broadcasting of messages to all users
     for sock in clients:  # iterate through all clients receiving socket
         sock.send(bytes(prefix, "utf8")+msg)  # send the msg to each client
