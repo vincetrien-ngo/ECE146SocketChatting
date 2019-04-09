@@ -14,7 +14,8 @@ addresses = {}#stores new clients addresses
 BUFSIZ = 1024#Change this value to change the buffersize of sockets
 
 server = socket.socket()#server is now socket type and can receive/send through sockets
-host = '192.168.0.44'#my internal IP
+#host = '192.168.0.44'#my internal IP
+host = '127.0.0.1'
 port = 50000#Port to be used for external access to my server
 server.bind((host,port))#Bind the socket type to host/port
 
@@ -26,7 +27,7 @@ def portListener():#listen for new clients
         client, clientAddress = server.accept()#accept the new TCP connection
         print("%s:%s has connected." % clientAddress)#Notify server of new connection
         addresses[client] = clientAddress#store clients address in list
-        Thread(target=handleClient, args=(client,)).start()#initialize new thread               
+        Thread(target=handleClient, args=(client,)).start()#initialize new thread
 
 def handleClient(client):#handle client interaction
     loggedIn = False
@@ -43,15 +44,21 @@ def handleClient(client):#handle client interaction
                 loggedIn = True
                 friendsList(name)
                 client.send(bytes("Success", "utf8"))
-                time.sleep(0.3)
-                
+                time.sleep(0.2)
+
                 connection = sqlite3.connect(name + ".db")
                 results = connection.cursor()
-                currFriends = results.execute("SELECT friend FROM friends").fetchall()
+
+                currFriends = results.execute("SELECT * FROM friends").fetchall()
                 currResult = 0
                 if currFriends:
                     for result in currFriends:
                         client.send(bytes(currFriends[currResult][0], "utf8"))
+                        time.sleep(0.3)
+                        if currFriends[currResult][1] == 1:
+                            client.send(bytes("ONLINE", "utf8"))
+                        else:
+                            client.send(bytes("OFFLINE", "utf8"))
                         currResult = currResult + 1
                         time.sleep(0.3)
                 client.send(bytes("FINISHED", "utf8"))
