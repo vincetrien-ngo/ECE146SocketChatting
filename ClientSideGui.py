@@ -2,7 +2,7 @@ from loginWidget import*
 from ugoChat import*
 from registrationPage import *
 from registrationPage import Ui_registrationWindow
-import sys, sqlite3, time
+import sys, sqlite3, time, textwrap
 from userNotFound import Ui_userNotFoundForm
 from loginSuccess import Ui_loginSuccess
 from ugoChat import Ui_MainWindow
@@ -17,6 +17,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         self.ui.setupUi(self)
         self.ui.REGISTER.clicked.connect(self.openRegistration)
         self.ui.LOGIN.clicked.connect(self.loginCheck)
+        self.ui.lineEdit.returnPressed.connect(self.ui.LOGIN.click)
 
     def openRegistration(self):  # opens registration page and hides login screen
         myRegi.show()  # show registration page
@@ -24,11 +25,12 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         myapp.hide()  # hide main login screen
         myRegi.ui.returnButton.clicked.connect(self.returnToLogin)  # event to trigger the login screen
         myRegi.ui.confirmButton.clicked.connect(self.confirmReg)  # event to try logging in
+        myRegi.ui.lineEdit_3.returnPressed.connect(myRegi.ui.confirmButton.click)  #  When pressing enter initiates the clicking of confirm button
 
     def confirmReg(self):  # Function to store username and password into serverside database
         inputUser = myRegi.ui.lineEdit.text()  # retrieve text from username textbox
         inputPass = myRegi.ui.lineEdit_2.text()  # retrieve text from password textbox
-        confirmPass = myRegi.ui.lineEdit_3.text()  # retrive text from confirm password textbox
+        confirmPass = myRegi.ui.lineEdit_3.text()  # retrieve text from confirm password textbox
 
         if inputPass != confirmPass or inputPass == "" or inputUser == "" or confirmPass == "":
             Rerror.show()
@@ -50,6 +52,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
                 myRegi.ui.lineEdit_2.clear()  # clear password input text box
                 myRegi.ui.lineEdit_3.clear()  # clear confirm password text box
                 Rsuccess.success.loginSuccessButton.clicked.connect(self.returnToLogin)
+                Rsuccess.success.loginSuccessButton.autoDefault()
             elif serverResponse == "Username Taken!":
                 Rerror.show()
                 myRegi.ui.lineEdit.clear()  # clear username input text box
@@ -66,16 +69,32 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
 
 
     def loginCheck(self):
+        global username
         username = self.ui.UNbox.text()
         password = self.ui.lineEdit.text()
         send("1")  # signals a login attempt to the server
         send(username)
-        time.sleep(0.3)
+        time.sleep(0.2)
         send(password)
-        time.sleep(0.3)
+        time.sleep(0.2)
         receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
 
         if receiveMes == "Success":
+            friends = QStandardItemModel(myChat.mainChat.listView)
+            while receiveMes != "FINISHED":  # populate friends list from servers database
+                receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
+
+                if receiveMes != "FINISHED":
+                    friendStatus = client_socket.recv(BUFSIZ).decode("utf8")
+                    if friendStatus == "ONLINE":
+                        friend = QStandardItem(QtGui.QIcon('userOnline.png'), receiveMes)
+                    else:
+                        friend = QStandardItem(QtGui.QIcon('userOffline.png'), receiveMes)
+                    friends.appendRow(friend)
+
+                time.sleep(0.2)
+
+            myChat.mainChat.listView.setModel(friends)  # Display friends on side column
             mySuccess.show()  # make the object active on the screen
             mySuccess.su.loginSuccessButton.clicked.connect(self.appInitialize)
         else:
@@ -101,6 +120,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         self.receiveMessages.start()  # start thread to receive messages in psuedo parallel to running the gui
 
         myChat.mainChat.sendMessage_Button.clicked.connect(self.sendMessage)
+        myChat.mainChat.sendMessage_LineEdit.returnPressed.connect(myChat.mainChat.sendMessage_Button.click)
 
     def sendMessage(self):  # Sends message to server and server then displays it in the global chat
         messageToSend = myChat.mainChat.sendMessage_LineEdit.text()
@@ -180,18 +200,21 @@ class receiverThread(QThread):
         while True:
             try:
                 msg = client_socket.recv(BUFSIZ).decode("utf8")  # recieve messages handled by server
+                if "hannsel101" in msg:
+                    msg = '<p align="left"> <span style="background-color: #5391f4">%s</span> </p>' % msg
+                else:
+                    msg = '<p align="right"> <span style="background-color: #10b73f">%s</span> </p>' % msg
                 myChat.mainChat.textBrowser.append(msg)  # append to chat box
             except OSError:  # Possibly client has left the chat.
                 break
 # ----------------------------------------------------------------------------------------------------------------------
-# SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER AND CREATE THREADS
+# SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER
 # ----------------------------------------------------------------------------------------------------------------------
 
 
 global haveLoggedIn
 haveLoggedIn = False
-# host = '192.168.0.44'
-# host = '73.235.230.212' # 127.0.0.1, this IP can be used if you wanna run the client and server on the same computer
+#host = '73.235.230.212'
 host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
@@ -214,3 +237,6 @@ if __name__ == "__main__":  # Main program execution starts here
     myChat = mainChat()
     myapp.show()
     sys.exit(app.exec_())
+
+  #  User by Luis Prado from the Noun Project (ugo chat online/ offline icon)
+  #  User by Wilson Joseph from the Noun Project(message received)
