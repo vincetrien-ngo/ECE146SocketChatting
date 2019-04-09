@@ -11,8 +11,8 @@ from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 
 
 class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to the login screen
-    def __init__(self,parent=None):  # function to initialize widget
-        QtWidgets.QWidget.__init__(self,parent)
+    def __init__(self, parent=None):  # function to initialize widget
+        QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.ui.REGISTER.clicked.connect(self.openRegistration)
@@ -164,6 +164,13 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
         self.mainChat = Ui_MainWindow()
         self.mainChat.setupUi(self)
 
+    def closeEvent(self, event):
+        send("//exit")
+        client_socket.close()  # close the socket connection
+        myChat.close()
+        exit()
+
+
 
 class receiverThread(QThread):
     def __init__(self, parent=None):
@@ -184,7 +191,8 @@ class receiverThread(QThread):
 global haveLoggedIn
 haveLoggedIn = False
 # host = '192.168.0.44'
-host = '73.235.230.212'
+# host = '73.235.230.212' # 127.0.0.1, this IP can be used if you wanna run the client and server on the same computer
+host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)

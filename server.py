@@ -10,11 +10,12 @@ from threading import Thread
 
 clients = {}  # stores new clients
 addresses = {}  # stores new clients addresses
-BUFSIZ = 1024  # Change this value to change the buffersize of sockets
+BUFSIZ = 1024  # Change this value to change the buffer size of sockets
 
 server = socket.socket()  # server is now socket type and can receive/send through sockets
 # host = '192.168.0.44'  # my internal IP 73.235.230.212
-host = '73.235.230.212'
+# host = '73.235.230.212'  # 127.0.0.1, this IP can be used if you wanna run the client and server on the same computer
+host = '127.0.0.1'
 port = 50000  # Port to be used for external access to my server
 server.bind((host, port))  # Bind the socket type to host/port
 
@@ -62,13 +63,14 @@ def handleClient(client):  # handle client interaction
     clients[client] = name  # Store the clients selected name
     while True:  # loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)  # receive message from client
-        if msg != bytes("{exit}", "utf8"):
+        if msg != bytes("//exit", "utf8"):
             broadcast(msg, name+": ")  # Send message to all other users
         else:  # user wishes to disconnect
             client.close()  # remove clients socket connection
             del clients[client]  # delete client from list of clients
             broadcast(bytes("%s has left the chat." % name, "utf8"))  # broadcast exit
             break  # end of while loop
+
 
 
 def broadcast(msg, prefix=""):  # handles the broadcasting of messages to all users
