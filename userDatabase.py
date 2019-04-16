@@ -14,7 +14,7 @@ def friendsList(username):#function to create a friends list for every unique us
 
 def updateFriends(username, newFriend):#update a users friends list
     connection = sqlite3.connect(username + ".db")  #connect to database file
-    checkFriends = connection.execute("SELECT friend FROM friends WHERE friend = ?",(newFriend))
+    checkFriends = connection.execute("SELECT friend FROM friends WHERE friend = ?",(newFriend,))
     if(checkFriends.fetchone()):
         connection.close()
     else:
@@ -24,13 +24,27 @@ def updateFriends(username, newFriend):#update a users friends list
 
 def checkOnlineStatus(username, client, statusUpdate):  #  user is the current user and client is another user that is logged in
     connection = sqlite3.connect(username + ".db")
-    checkFriends = connection.execute ("SELECT friend FROM friends WHERE friend = ?", (client))
+    checkFriends = connection.execute ("SELECT friend FROM friends WHERE friend = ?", (client,))
     if checkFriends.fetchone():
         connection.execute("UPDATE friends SET online = ?  WHERE friend = ?", (statusUpdate, client))
         connection.commit()
         connection.close()
     else:
         connection.close()
+
+def checkAllOnlineStatus(username, clients = []):  #  similar to checkOnlineStatus() but checks all friends instead of just one
+    connection = sqlite3.connect(username + ".db")
+    checkFriends = connection.execute("SELECT friend FROM friends")  #  retreive full list of friends
+    for currIndex in checkFriends:
+        if currIndex in clients:
+            connection.execute("UPDATE friends SET online = ? WHERE friend = ?", (1, currIndex[0]))
+            connection.commit()
+        else:
+            connection.execute("UPDATE friends SET online = ? WHERE friend = ?", (0, currIndex[0]))
+            connection.commit()
+
+    connection.close()
+        
 #################EXPERIMENTAL FUNCTION##################################################
 def updateTable(username,password):#function to add users into server database
     userInfo = sqlite3.connect("login.db")
