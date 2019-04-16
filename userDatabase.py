@@ -4,7 +4,6 @@ def createTable():#function to create a new database
     connection = sqlite3.connect("login.db")
     connection.execute("CREATE TABLE USERS(USERNAME TEXT NOT NULL, PASSWORD TEXT)")
     connection.commit()
-    result = connection.execute("SELECT * FROM USERS")
     connection.close()
 #################EXPERIMENTAL FUNCTION##################################################
 def friendsList(username):#function to create a friends list for every unique user
@@ -22,7 +21,16 @@ def updateFriends(username, newFriend):#update a users friends list
         connection.execute("INSERT INTO friends VALUES(?,?)",(newFriend, 0))
         connection.commit()
         connection.close()
-     
+
+def checkOnlineStatus(username, client, statusUpdate):  #  user is the current user and client is another user that is logged in
+    connection = sqlite3.connect(username + ".db")
+    checkFriends = connection.execute ("SELECT friend FROM friends WHERE friend = ?", (client))
+    if checkFriends.fetchone():
+        connection.execute("UPDATE friends SET online = ?  WHERE friend = ?", (statusUpdate, client))
+        connection.commit()
+        connection.close()
+    else:
+        connection.close()
 #################EXPERIMENTAL FUNCTION##################################################
 def updateTable(username,password):#function to add users into server database
     userInfo = sqlite3.connect("login.db")

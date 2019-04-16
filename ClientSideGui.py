@@ -8,6 +8,7 @@ from loginSuccess import Ui_loginSuccess
 from ugoChat import Ui_MainWindow
 from socket import AF_INET, socket, SOCK_STREAM
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtGui import *
 
 
 class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to the login screen
@@ -25,7 +26,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         myapp.hide()  # hide main login screen
         myRegi.ui.returnButton.clicked.connect(self.returnToLogin)  # event to trigger the login screen
         myRegi.ui.confirmButton.clicked.connect(self.confirmReg)  # event to try logging in
-        myRegi.ui.lineEdit_3.returnPressed.connect(myRegi.ui.confirmButton.click)  #  When pressing enter initiates the clicking of confirm button
+        myRegi.ui.lineEdit_3.returnPressed.connect(myRegi.ui.confirmButton.click)  # When pressing enter initiates the clicking of confirm button
 
     def confirmReg(self):  # Function to store username and password into serverside database
         inputUser = myRegi.ui.lineEdit.text()  # retrieve text from username textbox
@@ -78,21 +79,20 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
 
         if receiveMes == "Success":
-            friends = QStandardItemModel(myChat.mainChat.listView)
+            friendIndex = 0
             while receiveMes != "FINISHED":  # populate friends list from servers database
                 receiveMes = client_socket.recv(BUFSIZ).decode("utf8")
-
                 if receiveMes != "FINISHED":
+                    userFriends[friendIndex] = receiveMes
                     friendStatus = client_socket.recv(BUFSIZ).decode("utf8")
                     if friendStatus == "ONLINE":
-                        friend = QStandardItem(QtGui.QIcon('userOnline.png'), receiveMes)
+                        userFriendsOnline[friendIndex] = "ONLINE"
                     else:
-                        friend = QStandardItem(QtGui.QIcon('userOffline.png'), receiveMes)
-                    friends.appendRow(friend)
+                        userFriendsOnline[friendIndex] = "OFFLINE"
+                    friendIndex += 1
 
                 time.sleep(0.2)
 
-            myChat.mainChat.listView.setModel(friends)  # Display friends on side column
             mySuccess.show()  # make the object active on the screen
             mySuccess.su.loginSuccessButton.clicked.connect(self.appInitialize)
         else:
@@ -114,8 +114,8 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         mySuccess.close()  # will not be needed anymore
         myapp.close()  # will not be needed anymore
 
-        self.receiveMessages = receiverThread()
-        self.receiveMessages.start()  # start thread to receive messages in psuedo parallel to running the gui
+        self.receiveMessages = receiverThread(userFriends, userFriendsOnline)
+        self.receiveMessages.start()  # start thread to receive messages in pseudo parallel to running the gui
 
         myChat.mainChat.sendMessage_Button.clicked.connect(self.sendMessage)
         myChat.mainChat.sendMessage_LineEdit.returnPressed.connect(myChat.mainChat.sendMessage_Button.click)
@@ -128,15 +128,10 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
 
 def send(msg, event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))  # send the user input to server for handling
-    if msg == "//exit":  # typing {exit} will cause client to exit
-        client_socket.close()  # close the socket connection
-        myChat.close()
-
 
 # ***********************************************************************************************************************
 # Classes to instantiate gui objects##
 # ***********************************************************************************************************************
-
 class myReg(QtWidgets.QMainWindow):  # class to create and use objects pertaining to the registration page
     def __init__(self, parent=None):  # function to initialize widget
         QtWidgets.QWidget.__init__(self, parent)
@@ -188,29 +183,84 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
         myChat.close()
         exit()
 
-
+# ----------------------------------------------------------------------------------------------------------------------
+# Other Functions and threads
+# ----------------------------------------------------------------------------------------------------------------------
 class receiverThread(QThread):
-    def __init__(self, parent=None):
+    def __init__(self, userFriends = [], userFriendsOnline = [], parent=None):
         super(receiverThread, self).__init__(parent)
+        self.friendsList = userFriends
+        self.friendsOnline = userFriendsOnline
 
     def run(self):
+        synchronizeFriends = friendSync(self.friendsList, self.friendsOnline)
+        synchronizeFriends.start()
+
         while True:
             try:
-                msg = client_socket.recv(BUFSIZ).decode("utf8")  # recieve messages handled by server
-                if "hannsel101" in msg:
+                msg = client_socket.recv(BUFSIZ).decode("utf8")  # receive messages handled by server
+                #experimental-------------------------------------
+                if "luke" in msg:  # server updating online status of another user
+                    synchronizeFriends.friendToUpdate = "luke"
+                    synchronizeFriends.performSync = True
+                #experimental------------------------------------
+                elif "hannsel101" in msg:
                     msg = '<p align="left"> <span style="background-color: #5391f4">%s</span> </p>' % msg
+                    myChat.mainChat.textBrowser.append(msg)  # append to chat box
                 else:
-                    msg = '<p align="right"> <span style="background-color: #10b73f">%s</span> </p>' % msg
-                myChat.mainChat.textBrowser.append(msg)  # append to chat box
+                    msg = '<p align="left"> <span style="background-color: #10b73f">%s</span> </p>' % msg
+                    myChat.mainChat.textBrowser.append(msg)  # append to chat box
+                #myChat.mainChat.textBrowser.append(msg)  # append to chat box
             except OSError:  # Possibly client has left the chat.
                 break
+
+class friendSync(QThread):
+    def __init__(self, userFriends = [], userFriendsOnline = [], parent=None):
+        super(friendSync, self).__init__(parent)
+        self.friendsList = userFriends  # list of friends passed into thread
+        self.friendsOnline = userFriendsOnline  # list holding status of each friend passed into thread
+        self.performSync = False  # status flag to perform a synchronization of list with servers up to date list
+        self.addFriend = False  # status flag to add a friend to the list
+        self.friendToAdd = ""  # friend that will be added to the list
+        self.friendToAddStatus = ""  # online status of friend being added to the list
+        self.friendToUpdate = ""  # current friend that has either logged in or out recently
+        self.friendship = QStandardItemModel(myChat.mainChat.listView)  # item model to display friends on QlistView
+
+    def run(self):
+        for user in self.friendsList:
+            if self.friendsOnline[user] == "ONLINE":
+                self.friend = QStandardItem(QtGui.QIcon('userOnline.png'), self.friendsList[user])
+            else:
+                self.friend = QStandardItem(QtGui.QIcon('userOffline.png'), self.friendsList[user])
+            self.friendship.appendRow(self.friend)
+        myChat.mainChat.listView.setModel(self.friendship)
+
+        while True:
+            if self.performSync:
+                for friend in self.friendsList:
+                    if self.friendsList[friend] == self.friendToUpdate:
+                        if self.friendsOnline[friend] == "ONLINE":
+                            self.friendsOnline[friend] = "OFFLINE"
+                            self.friendship.setItem(friend, QStandardItem(QtGui.QIcon('userOffline.png'), self.friendToUpdate))
+                        else:
+                            self.friendsOnline[friend] = "ONLINE"
+                            self.friendship.setItem(friend, QStandardItem(QtGui.QIcon('userOnline.png'), self.friendToUpdate))
+
+                        self.performSync = False
+
+            if self.addFriend:
+                self.friend = QStandardItem(QtGui.QIcon("userOffline.png"), "luke")
+                self.friendship.appendRow(self.friend)
+                self.addFriend = False
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER
 # ----------------------------------------------------------------------------------------------------------------------
-
-
 global haveLoggedIn
 haveLoggedIn = False
+userFriends = {}
+userFriendsOnline = {}
 #host = '73.235.230.212'
 host = '127.0.0.1'
 port = 50000
@@ -222,8 +272,7 @@ client_socket.connect(ADDR)
 # ----------------------------------------------------------------------------------------------------------------------
 # GUI SECTION OF THE PROGRAM TO INITIALIZE DIFFERENT GUI OBJECTS BEFORE HAVING TO DISPLAY THEM LATER IN THE PROGRAM
 # ----------------------------------------------------------------------------------------------------------------------
-
-if __name__ == "__main__":  # Main program execution starts here
+if __name__ == "__main__":  # Main GUI program execution starts here
     app = QtWidgets.QApplication(sys.argv)
     myapp = myWin()
     myRegi = myReg()
@@ -235,5 +284,5 @@ if __name__ == "__main__":  # Main program execution starts here
     myapp.show()
     sys.exit(app.exec_())
 
-  #  User by Luis Prado from the Noun Project (ugo chat online/ offline icon)
-  #  User by Wilson Joseph from the Noun Project(message received)
+    #  User by Luis Prado from the Noun Project (ugo chat online/ offline icon)
+    #  User by Wilson Joseph from the Noun Project(message received icon)

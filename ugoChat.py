@@ -8,7 +8,8 @@ class Ui_MainWindow(object):
         MainWindow.resize(440, 391)
         font = QtGui.QFont()
         font.setFamily("Monotype Corsiva")
-        font.setItalic(True)
+        #font.setFamily("Segoe UI Emoji")
+        #font.setBold(True)
         MainWindow.setFont(font)
         MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -19,7 +20,6 @@ class Ui_MainWindow(object):
         self.comboBox.addItem("")
         self.comboBox.addItem("")
         self.comboBox.addItem("")
-        #self.comboBox.addItem("")
         self.sendMessage_Button = QtWidgets.QCommandLinkButton(self.centralwidget)
         self.sendMessage_Button.setGeometry(QtCore.QRect(410, 310, 31, 31))
         self.sendMessage_Button.setText("")
@@ -51,6 +51,7 @@ class Ui_MainWindow(object):
         self.sendMessage_LineEdit.setFont(font)
         self.sendMessage_LineEdit.setAutoFillBackground(False)
         self.sendMessage_LineEdit.setObjectName("sendMessage_LineEdit")
+
         self.listView = QtWidgets.QListView(self.centralwidget)
         self.listView.setGeometry(QtCore.QRect(0, 20, 161, 321))
         palette = QtGui.QPalette()
@@ -93,7 +94,6 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Ugo Chat"))
         MainWindow.setWindowIcon(QtGui.QIcon('bigUgo.png'))
-        #self.comboBox.setItemText(0, _translate("MainWindow", "Menu"))
         self.comboBox.setItemText(0, _translate("MainWindow", "Friends"))
         self.comboBox.setItemText(1, _translate("MainWindow", "Settings"))
         self.comboBox.setItemText(2, _translate("MainWindow", "Exit"))

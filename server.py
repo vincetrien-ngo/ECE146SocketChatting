@@ -1,5 +1,5 @@
 import socket, time, signal, sqlite3
-from userDatabase import updateTable
+from userDatabase import updateTable, checkOnlineStatus
 from userDatabase import checkTable
 from userDatabase import checkUserName
 from userDatabase import friendsList
@@ -25,7 +25,7 @@ server.bind((host, port))  # Bind the socket type to host/port
 def portListener():#listen for new clients
     while True:
         client, clientAddress = server.accept()#accept the new TCP connection
-        print("%s:%s has connected." % clientAddress)#Notify server of new connection
+        print("%s:%s has established a connection." % clientAddress)#Notify server of new connection
         addresses[client] = clientAddress#store clients address in list
         Thread(target=handleClient, args=(client,)).start()#initialize new thread
 
@@ -45,6 +45,9 @@ def handleClient(client):#handle client interaction
                 friendsList(name)
                 client.send(bytes("Success", "utf8"))
                 time.sleep(0.2)
+
+                for client in clients:
+                    checkOnlineStatus(name, clients[client], 1)
 
                 connection = sqlite3.connect(name + ".db")
                 results = connection.cursor()
@@ -77,11 +80,13 @@ def handleClient(client):#handle client interaction
     
     time.sleep(1)
     clients[client] = name  # Store the clients selected name
+    print("%s successfully logged in." % clients[client])
     while True:  # loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)  # receive message from client
         if msg != bytes("//exit", "utf8"):
             broadcast(msg, name+": ")  # Send message to all other users
         else:  # user wishes to disconnect
+            print("%s has disconnected." % clients[client])
             client.close()  # remove clients socket connection
             del clients[client]  # delete client from list of clients
             broadcast(bytes("%s has left the chat." % name, "utf8"))  # broadcast exit
@@ -92,24 +97,6 @@ def broadcast(msg, prefix=""):  # handles the broadcasting of messages to all us
     for sock in clients:  # iterate through all clients receiving socket
         sock.send(bytes(prefix, "utf8")+msg)  # send the msg to each client
 
-# --------------------------------------------------
-# main()
-# --------------------------------------------------
-
-    clients[client] = name#Store the clients selected name
-    while True:#loop in charge of allowing the client pass messages
-        msg = client.recv(BUFSIZ)#receive message from client
-        if msg != bytes("//exit", "utf8"):
-            broadcast(msg, name+": ")#Send message to all other users
-        else:#user wishes to disconnect
-            client.close()#remove clients socket connection
-            del clients[client]#delete client from list of clients
-            #broadcast(bytes("%s has left the chat." % name, "utf8"))#broadcast exit
-            break#end of while loop
-
-def broadcast(msg, prefix=""):#handles the broadcasting of messages to all users
-    for sock in clients:#iterate through all clients receiving socket
-        sock.send(bytes(prefix, "utf8")+msg)#send the msg to each client
 #--------------------------------------------------
 #main()
 #--------------------------------------------------
