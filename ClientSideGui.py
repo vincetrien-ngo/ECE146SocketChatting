@@ -28,7 +28,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         myRegi.ui.confirmButton.clicked.connect(self.confirmReg)  # event to try logging in
         myRegi.ui.lineEdit_3.returnPressed.connect(myRegi.ui.confirmButton.click)  # When pressing enter initiates the clicking of confirm button
 
-    def confirmReg(self):  # Function to store username and password into serverside database
+    def confirmReg(self):  # Function to store username and password into server-side database
         inputUser = myRegi.ui.lineEdit.text()  # retrieve text from username textbox
         inputPass = myRegi.ui.lineEdit_2.text()  # retrieve text from password textbox
         confirmPass = myRegi.ui.lineEdit_3.text()  # retrieve text from confirm password textbox
@@ -114,7 +114,7 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         mySuccess.close()  # will not be needed anymore
         myapp.close()  # will not be needed anymore
 
-        self.receiveMessages = receiverThread(userFriends, userFriendsOnline)
+        self.receiveMessages = receiverThread(username, userFriends, userFriendsOnline)
         self.receiveMessages.start()  # start thread to receive messages in pseudo parallel to running the gui
 
         myChat.mainChat.sendMessage_Button.clicked.connect(self.sendMessage)
@@ -187,10 +187,11 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
 # Other Functions and threads
 # ----------------------------------------------------------------------------------------------------------------------
 class receiverThread(QThread):
-    def __init__(self, userFriends = [], userFriendsOnline = [], parent=None):
+    def __init__(self, name, friendsOfUser = {}, isOnline = {}, parent=None):
         super(receiverThread, self).__init__(parent)
-        self.friendsList = userFriends
-        self.friendsOnline = userFriendsOnline
+        self.friendsList = friendsOfUser
+        self.friendsOnline = isOnline
+        self.yourMes = name
 
     def run(self):
         synchronizeFriends = friendSync(self.friendsList, self.friendsOnline)
@@ -200,18 +201,21 @@ class receiverThread(QThread):
             try:
                 msg = client_socket.recv(BUFSIZ).decode("utf8")  # receive messages handled by server
                 #experimental-------------------------------------
-                if "luke" in msg:  # server updating online status of another user
+                if "luke" in msg:  # testing synchronize friends thread
                     synchronizeFriends.friendToUpdate = "luke"
                     synchronizeFriends.performSync = True
+                elif ":" not in msg:  # update the online status of a friend
+                    if self.yourMes not in msg:
+                        synchronizeFriends.friendToUpdate = msg
+                        synchronizeFriends.performSync = True
                 #experimental------------------------------------
-                elif "hannsel101" in msg:
-                    msg = '<p align="left"> <span style="background-color: #5391f4">%s</span> </p>' % msg
+                elif self.yourMes+":" in msg:
+                    msg = '<span style="background-color: #5391f4">%s</span>' % msg
                     myChat.mainChat.textBrowser.append(msg)  # append to chat box
                 else:
-                    msg = '<p align="left"> <span style="background-color: #10b73f">%s</span> </p>' % msg
+                    msg = '<span style="background-color: #10b73f">%s</span>' % msg
                     myChat.mainChat.textBrowser.append(msg)  # append to chat box
-                #myChat.mainChat.textBrowser.append(msg)  # append to chat box
-            except OSError:  # Possibly client has left the chat.
+            except OSError:  # catch operating system errors.
                 break
 
 class friendSync(QThread):
@@ -220,7 +224,7 @@ class friendSync(QThread):
         self.friendsList = userFriends  # list of friends passed into thread
         self.friendsOnline = userFriendsOnline  # list holding status of each friend passed into thread
         self.performSync = False  # status flag to perform a synchronization of list with servers up to date list
-        self.addFriend = False  # status flag to add a friend to the list
+        self.performAdd = False  # status flag to perform add friend operation
         self.friendToAdd = ""  # friend that will be added to the list
         self.friendToAddStatus = ""  # online status of friend being added to the list
         self.friendToUpdate = ""  # current friend that has either logged in or out recently
@@ -234,6 +238,7 @@ class friendSync(QThread):
                 self.friend = QStandardItem(QtGui.QIcon('userOffline.png'), self.friendsList[user])
             self.friendship.appendRow(self.friend)
         myChat.mainChat.listView.setModel(self.friendship)
+        self.performSync = False
 
         while True:
             if self.performSync:
@@ -245,13 +250,14 @@ class friendSync(QThread):
                         else:
                             self.friendsOnline[friend] = "ONLINE"
                             self.friendship.setItem(friend, QStandardItem(QtGui.QIcon('userOnline.png'), self.friendToUpdate))
-
                         self.performSync = False
+                        break
 
-            if self.addFriend:
-                self.friend = QStandardItem(QtGui.QIcon("userOffline.png"), "luke")
-                self.friendship.appendRow(self.friend)
-                self.addFriend = False
+            #if self.addFriend:
+                #print('in addFriend')
+                #self.newFriend = QStandardItem(QtGui.QIcon("userOffline.png"), self.friendToAdd)
+                #self.friendship.appendRow(self.newFriend)
+                #self.addFriend = False
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -261,8 +267,8 @@ global haveLoggedIn
 haveLoggedIn = False
 userFriends = {}
 userFriendsOnline = {}
-#host = '73.235.230.212'
-host = '127.0.0.1'
+host = '73.235.230.212'
+#host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)
