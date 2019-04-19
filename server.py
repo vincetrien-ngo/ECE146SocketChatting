@@ -1,5 +1,5 @@
 import socket, time, signal, sqlite3, sys
-from userDatabase import updateTable, checkOnlineStatus, checkAllOnlineStatus
+from userDatabase import updateTable, checkOnlineStatus, checkAllOnlineStatus, checkFriends
 from userDatabase import checkTable, checkUserName, friendsList, updateFriends
 from threading import Thread
 
@@ -36,6 +36,7 @@ def handleClient(client):#handle client interaction
 
         if cmdNum == "1":#read command number for login attempt
             name = client.recv(BUFSIZ).decode("utf8")#receive the clients name
+            time.sleep(0.2)
             passWord = client.recv(BUFSIZ).decode("utf8")#receive the clients password
             if checkTable(name,passWord):
                 loggedIn = True
@@ -62,13 +63,27 @@ def handleClient(client):#handle client interaction
     time.sleep(1)
     clients[client] = name  # Store the clients selected name
     print("%s successfully logged in." % clients[client])
-    #experimental start-----------------------------------------------------
     broadcast(bytes(name, "utf8"))  #  prompt other users to update friends list
-    #experimental end-------------------------------------------------------
     while True:  # loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)  # receive message from client
         if "::" in msg.decode("utf8"):
             client.send(bytes("luke", "utf8"))
+        elif "//VERIFY ADD FRIEND:" in msg.decode("utf8"):  # user is attempting to add a friend           
+            if checkUserName(msg[20:len(msg)].decode("utf8")):
+                if checkFriends(name, msg[20:len(msg)].decode("utf8")):
+                    client.send(bytes("//CANNOT ADD FRIEND", "utf8"))
+                else:
+                    updateFriends(name, msg[20:len(msg)].decode("utf8"))
+                    onlineFlag = False
+                    for people in clients:
+                        if msg[20:len(msg)].decode("utf8") == clients[people]:
+                            onlineFlag = True
+                    if onlineFlag:
+                        client.send(msg + bytes("1", "utf8"))
+                    else:
+                        client.send(msg + bytes("0", "utf8"))
+            else:
+                client.send(bytes("//CANNOT ADD FRIEND", "utf8"))
         elif msg != bytes("//exit", "utf8"):
             broadcast(msg, name+": ")  # Send message to all other users
         else:  # user wishes to disconnect

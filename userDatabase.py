@@ -5,7 +5,7 @@ def createTable():#function to create a new database
     connection.execute("CREATE TABLE USERS(USERNAME TEXT NOT NULL, PASSWORD TEXT)")
     connection.commit()
     connection.close()
-#################EXPERIMENTAL FUNCTION##################################################
+
 def friendsList(username):#function to create a friends list for every unique user
     connection = sqlite3.connect(username + ".db")  #If file exist connect to it, else create it
     connection.execute("CREATE TABLE IF NOT EXISTS friends(friend TEXT NOT NULL PRIMARY KEY, online INTEGER)")  #Create friendslist table if it does not exist
@@ -44,8 +44,15 @@ def checkAllOnlineStatus(username, clients = []):  #  similar to checkOnlineStat
             connection.commit()
 
     connection.close()
+
+def checkFriends(username, newFriend):
+    userInfo = sqlite3.connect(username + ".db")
+    result = userInfo.execute("SELECT * FROM friends WHERE friend = ?",(newFriend,))
+    if(len(result.fetchall()) > 0):
+        return True
+    else:
+        return False
         
-#################EXPERIMENTAL FUNCTION##################################################
 def updateTable(username,password):#function to add users into server database
     userInfo = sqlite3.connect("login.db")
     userInfo.execute("INSERT INTO USERS VALUES(?,?)",(username,password))
