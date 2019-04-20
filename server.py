@@ -66,9 +66,8 @@ def handleClient(client):#handle client interaction
     broadcast(bytes(name, "utf8"))  #  prompt other users to update friends list
     while True:  # loop in charge of allowing the client pass messages
         msg = client.recv(BUFSIZ)  # receive message from client
-        if "::" in msg.decode("utf8"):
-            client.send(bytes("luke", "utf8"))
-        elif "//VERIFY ADD FRIEND:" in msg.decode("utf8"):  # user is attempting to add a friend           
+
+        if "//VERIFY ADD FRIEND:" in msg.decode("utf8"):  # user is attempting to add a friend           
             if checkUserName(msg[20:len(msg)].decode("utf8")):
                 if checkFriends(name, msg[20:len(msg)].decode("utf8")):
                     client.send(bytes("//CANNOT ADD FRIEND", "utf8"))
@@ -91,7 +90,7 @@ def handleClient(client):#handle client interaction
             client.close()  # remove clients socket connection
             del clients[client]  # delete client from list of clients
             broadcast(bytes(name, "utf8"))  #  signal users to update online friends
-            broadcast(bytes("%s has disconnected from Ugo Chat." % name, "utf8"))  # broadcast exit
+            broadcast(bytes("SERVER: %s has disconnected from Ugo Chat." % name, "utf8"))  # broadcast exit
             break  # end of while loop
 
 

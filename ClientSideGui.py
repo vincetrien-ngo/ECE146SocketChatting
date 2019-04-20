@@ -225,7 +225,6 @@ class receiverThread(QThread):
         while True:
             try:
                 msg = client_socket.recv(BUFSIZ).decode("utf8")  # receive messages handled by server
-                #experimental-------------------------------------
                 if "//CANNOT ADD FRIEND" in msg and not msg.find("//CANNOT ADD FRIEND"):
                     print("user does not exit or is already a friend")
                 elif "//VERIFY ADD FRIEND:" in msg and not msg.find("//VERIFY ADD FRIEND:"):  # server verifying the addition of a new friend
@@ -239,7 +238,6 @@ class receiverThread(QThread):
                     if msg not in self.yourMes:
                         synchronizeFriends.friendToUpdate = msg
                         synchronizeFriends.performSync = True
-                #experimental------------------------------------
                 elif not msg.find(self.yourMes+":"):
                     currTime = time.time()
                     stringTime = datetime.datetime.fromtimestamp(currTime).strftime('%H:%M:%S __ %m-%d-%Y ---')
