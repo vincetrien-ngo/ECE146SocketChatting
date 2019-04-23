@@ -72,7 +72,6 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         global username
         username = self.ui.UNbox.text()
         password = self.ui.lineEdit.text()
-
         if not username or not password:
             myError.show()
             self.ui.lineEdit.clear()
@@ -302,8 +301,8 @@ global haveLoggedIn
 haveLoggedIn = False
 userFriends = {}
 userFriendsOnline = {}
-host = '73.235.230.212'
-#host = '127.0.0.1'
+#host = '73.235.230.212'
+host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)

@@ -9,6 +9,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setFamily("Monotype Corsiva")
 
+
         MainWindow.setFont(font)
         MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
