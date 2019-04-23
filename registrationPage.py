@@ -149,7 +149,7 @@ class Ui_registrationWindow(object):
         palette.setBrush(QtGui.QPalette.Disabled, QtGui.QPalette.ToolTipText, brush)
         registrationWindow.setPalette(palette)
         font = QtGui.QFont()
-        font.setFamily("MS Reference Sans Serif")
+        # font.setFamily("MS Reference Sans Serif")
         registrationWindow.setFont(font)
         registrationWindow.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         icon = QtGui.QIcon()
