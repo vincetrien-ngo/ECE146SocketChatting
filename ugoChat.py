@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(440, 391)
+        MainWindow.resize(440, 400)
         font = QtGui.QFont()
         font.setFamily("Monotype Corsiva")
 
