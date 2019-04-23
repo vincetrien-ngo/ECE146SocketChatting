@@ -302,8 +302,8 @@ global haveLoggedIn
 haveLoggedIn = False
 userFriends = {}
 userFriendsOnline = {}
-host = '73.235.230.212'
-#host = '127.0.0.1'
+#host = '73.235.230.212'
+host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)

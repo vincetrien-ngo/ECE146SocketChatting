@@ -11,8 +11,8 @@ addresses = {}#stores new clients addresses
 BUFSIZ = 1024#Change this value to change the buffersize of sockets
 
 server = socket.socket()  # server is now socket type and can receive/send through sockets
-#host = '127.0.0.1'
-host = '192.168.0.44'
+host = '127.0.0.1'
+#host = '192.168.0.44'
 port = 50000  # Port to be used for external access to my server
 server.bind((host, port))  # Bind the socket type to host/port
 
