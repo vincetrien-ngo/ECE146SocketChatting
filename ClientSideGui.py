@@ -7,7 +7,7 @@ from userNotFound import Ui_userNotFoundForm
 from loginSuccess import Ui_loginSuccess
 from ugoChat import Ui_MainWindow
 from socket import AF_INET, socket, SOCK_STREAM
-from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot, QRectF, QRect
 from PyQt5.QtGui import *
 import datetime
 
@@ -161,15 +161,20 @@ class myErr(QtWidgets.QMainWindow):  # class used to create error message window
         QtWidgets.QWidget.__init__(self, parent)
         self.er = Ui_userNotFoundForm()
         self.er.setupUi(self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowOpacity(0.9)
 
 
 class RegError(QtWidgets.QMainWindow):
     def __init__(self, parent=None):  # function to initialize widget
         QtWidgets.QWidget.__init__(self, parent)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.error = Ui_userNotFoundForm()
         self.error.setupUi(self)
         self.error.userNotFoundLabel.setGeometry(QtCore.QRect(50, 40, 154, 24))
         self.error.userNotFoundLabel.setText("Error Registering!")
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowOpacity(0.9)
 
 
 class RegSuccess(QtWidgets.QMainWindow):
@@ -179,6 +184,8 @@ class RegSuccess(QtWidgets.QMainWindow):
         self.success.setupUi(self)  # setup the user interface
         self.success.loginSuccessLabel.setGeometry(QtCore.QRect(15,40,215,24))  # set x,y,width,and height parameters for label
         self.success.loginSuccessLabel.setText("Registration Successful!")  # set the text inside the label
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowOpacity(0.9)
 
 
 class mySuc(QtWidgets.QMainWindow):  # class used to create successful login popup window for login screen
@@ -186,6 +193,8 @@ class mySuc(QtWidgets.QMainWindow):  # class used to create successful login pop
         QtWidgets.QWidget.__init__(self, parent)
         self.su = Ui_loginSuccess()
         self.su.setupUi(self)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowOpacity(0.9)
 
 
 class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat widget after logging in successfully
@@ -193,7 +202,6 @@ class mainChat(QtWidgets.QMainWindow):  # class used to create the main chat wid
         QtWidgets.QWidget.__init__(self, parent)
         self.mainChat = Ui_MainWindow()
         self.mainChat.setupUi(self)
-
 
 
     def closeEvent(self, event):
@@ -242,11 +250,13 @@ class receiverThread(QThread):
                     stringTime = datetime.datetime.fromtimestamp(currTime).strftime('%H:%M:%S __ %m-%d-%Y ---')
                     msg = '<p style="background-color: #01bdc4">%s <br><span style="background-color:#01bdc4">---TimeStamp: %s</span></p>' % (msg, stringTime)
                     myChat.mainChat.textBrowser.append(msg)  # append to chat box
+                    myChat.mainChat.textBrowser.moveCursor(QTextCursor.End)
                 else:
                     currTime = time.time()
                     stringTime = datetime.datetime.fromtimestamp(currTime).strftime('%H:%M:%S __ %m-%d-%Y ---')
                     msg = '<p style="background-color: #11ad16">%s <br><span style="background-color:#11ad16">---TimeStamp: %s</span></p>' % (msg, stringTime)
                     myChat.mainChat.textBrowser.append(msg)  # append to chat box
+                    myChat.mainChat.textBrowser.moveCursor(QTextCursor.End)
             except OSError:  # catch operating system errors.
                 break
 
@@ -301,8 +311,8 @@ global haveLoggedIn
 haveLoggedIn = False
 userFriends = {}
 userFriendsOnline = {}
-host = '73.235.230.212'
-#host = '127.0.0.1'
+#host = '73.235.230.212'
+host = '127.0.0.1'
 port = 50000
 BUFSIZ = 1024
 ADDR = (host, port)
