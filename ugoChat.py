@@ -39,6 +39,7 @@ class Ui_MainWindow(object):
         self.addFriend_Button = QtWidgets.QPushButton(self.centralwidget)
         self.addFriend_Button.setGeometry(QtCore.QRect(120, 319, 21, 21))
         self.addFriend_LineEdit.setText("")
+        self.addFriend_LineEdit.setPlaceholderText("          <Add friend here>")
         self.addFriend_Button.setObjectName("addFriend_Button")
         self.addFriend_Button.setIcon(QIcon('addFriend.png'))
         self.addFriend_Button.setStyleSheet("background-color: rgb(74, 116, 138);")
@@ -69,6 +70,7 @@ class Ui_MainWindow(object):
         self.sendMessage_LineEdit.setFont(font)
         self.sendMessage_LineEdit.setAutoFillBackground(False)
         self.sendMessage_LineEdit.setObjectName("sendMessage_LineEdit")
+        self.sendMessage_LineEdit.setPlaceholderText("                <Type here to chat>")
 
         self.listView = QtWidgets.QListView(self.centralwidget)
         self.listView.setGeometry(QtCore.QRect(0, 20, 141, 300))
