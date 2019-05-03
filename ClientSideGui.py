@@ -124,7 +124,8 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         self.receiveMessages = receiverThread(username, userFriends, userFriendsOnline)
         self.receiveMessages.start()  # start thread to receive messages in pseudo parallel to running the gui
 
-        myChat.mainChat.addFriend_Button.clicked.connect(self.addingFriend)
+        myChat.mainChat.addFriend_Button.clicked.connect(self.addingFriend)  # handles addfriend button clicked event
+        myChat.mainChat.delFriend_Button.clicked.connect(self.deleteFriend)  # handles delete friend button clicked event
 
         myChat.mainChat.sendMessage_Button.clicked.connect(self.sendMessage)
         myChat.mainChat.sendMessage_LineEdit.returnPressed.connect(myChat.mainChat.sendMessage_Button.click)
@@ -140,7 +141,14 @@ class myWin(QtWidgets.QMainWindow):  # to create and use objects pertaining to t
         myChat.mainChat.addFriend_LineEdit.clear()
         if newFriend:
             send("//VERIFY ADD FRIEND:"+newFriend)
+            newFriend = ""
 
+    def deleteFriend(self):
+        oldFriend = myChat.mainChat.addFriend_LineEdit.text()
+        myChat.mainChat.addFriend_LineEdit.clear()
+        if oldFriend:
+            send("//VERIFY DEL FRIEND:"+oldFriend)
+            oldFriend = ""
 
 
 def send(msg, event=None):  # event is passed by binders.
@@ -232,6 +240,7 @@ class receiverThread(QThread):
         while True:
             try:
                 msg = client_socket.recv(BUFSIZ).decode("utf8")  # receive messages handled by server
+
                 if "//CANNOT ADD FRIEND" in msg and not msg.find("//CANNOT ADD FRIEND"):
                     print("user does not exit or is already a friend")
                 elif "//VERIFY ADD FRIEND:" in msg and not msg.find("//VERIFY ADD FRIEND:"):  # server verifying the addition of a new friend
@@ -241,6 +250,11 @@ class receiverThread(QThread):
                     else:
                         synchronizeFriends.friendToAddStatus = "ONLINE"
                     synchronizeFriends.performAdd = True
+                elif "//VERIFY DEL FRIEND:" in msg and not msg.find("//VERIFY DEL FRIEND:"):  # server sent permission to delete friend
+                    synchronizeFriends.friendToDel = msg[20:len(msg)]
+                    synchronizeFriends.performDel = True
+                elif "//CANNOT DEL FRIEND:" in msg and not msg.find("//CANNOT DEL FRIEND"):
+                    print("user cannot be deleted")
                 elif ":" not in msg:  # update the online status of a friend
                     if msg not in self.yourMes:
                         synchronizeFriends.friendToUpdate = msg
@@ -267,7 +281,9 @@ class friendSync(QThread):
         self.friendsOnline = userFriendsOnline  # list holding status of each friend passed into thread
         self.performSync = False  # status flag to perform a synchronization of list with servers up to date list
         self.performAdd = False  # status flag to perform add friend operation
+        self.performDel = False # status flag to perform del friend operation
         self.friendToAdd = ""  # friend that will be added to the list
+        self.friendToDel = ""  # friend that will be deleted from list
         self.friendToAddStatus = ""  # online status of friend being added to the list
         self.friendToUpdate = ""  # current friend that has either logged in or out recently
         self.friendship = QStandardItemModel(myChat.mainChat.listView)  # item model to display friends on QlistView
@@ -276,8 +292,10 @@ class friendSync(QThread):
         for user in self.friendsList:
             if self.friendsOnline[user] == "ONLINE":
                 self.friend = QStandardItem(QtGui.QIcon('userOnline.png'), self.friendsList[user])
+                self.friend.setBackground(QColor('#42f7d3'))
             else:
                 self.friend = QStandardItem(QtGui.QIcon('userOffline.png'), self.friendsList[user])
+                self.friend.setBackground(QColor('#f77e41'))
             self.friendship.appendRow(self.friend)
         myChat.mainChat.listView.setModel(self.friendship)
 
@@ -287,22 +305,39 @@ class friendSync(QThread):
                     if self.friendsList[friend] == self.friendToUpdate:
                         if self.friendsOnline[friend] == "ONLINE":
                             self.friendsOnline[friend] = "OFFLINE"
-                            self.friendship.setItem(friend, QStandardItem(QtGui.QIcon('userOffline.png'), self.friendToUpdate))
+                            newItem = QStandardItem(QtGui.QIcon('userOffline.png'), self.friendToUpdate)
+                            newItem.setBackground(QColor('#f77e41'))
+                            self.friendship.setItem(friend, newItem)
                         else:
                             self.friendsOnline[friend] = "ONLINE"
-                            self.friendship.setItem(friend, QStandardItem(QtGui.QIcon('userOnline.png'), self.friendToUpdate))
+                            newItem = QStandardItem(QtGui.QIcon('userOnline.png'), self.friendToUpdate)
+                            newItem.setBackground(QColor('#41f7b4'))
+                            self.friendship.setItem(friend, newItem)
                         self.performSync = False
                         break
 
             if self.performAdd:
-                self.friendsList[len(self.friendsList)+1] = self.friendToAdd
+                self.friendsList[len(self.friendsList)] = self.friendToAdd
                 if "OFFLINE" in self.friendToAddStatus:
-                    self.friendship.appendRow(QStandardItem(QtGui.QIcon("userOffline.png"), self.friendToAdd))
-                    self.friendsOnline[len(self.friendsOnline)+1] = "OFFLINE"
+                    newItem = QStandardItem(QtGui.QIcon('userOffline.png'), self.friendToAdd)
+                    newItem.setBackground(QColor('#f77e41'))
+                    self.friendship.appendRow(newItem)
+                    self.friendsOnline[len(self.friendsOnline)] = "OFFLINE"
                 else:
-                    self.friendship.appendRow(QStandardItem(QtGui.QIcon("userOnline.png"), self.friendToAdd))
-                    self.friendsOnline[len(self.friendsOnline)+1] = "ONLINE"
+                    newItem = QStandardItem(QtGui.QIcon('userOnline.png'), self.friendToAdd)
+                    newItem.setBackground(QColor('#41f7b4'))
+                    self.friendship.appendRow(newItem)
+                    self.friendsOnline[len(self.friendsOnline)] = "ONLINE"
                 self.performAdd = False
+
+            if self.performDel:
+                for friend in self.friendsList:
+                    if self.friendsList[friend] == self.friendToDel:
+                        self.friendship.removeRow(friend)
+                        del self.friendsList[friend]
+                        del self.friendsOnline[friend]
+                        break
+                self.performDel = False
 
 # ----------------------------------------------------------------------------------------------------------------------
 # SOCKET SECTION OF THE PROGRAM TO CONNECT TO SERVER
@@ -337,3 +372,4 @@ if __name__ == "__main__":  # Main GUI program execution starts here
     #  User by Luis Prado from the Noun Project (ugo chat online/ offline icon)
     #  User by Wilson Joseph from the Noun Project(message received icon)
     #  add by Roselin Christina.S from the Noun Project(add friend icon)
+    #  Delete by Setyo Ari Wibowo from the Noun Project(delete friend icon)

@@ -72,7 +72,8 @@ def handleClient(client):#handle client interaction
                 if checkFriends(name, msg[20:len(msg)].decode("utf8")):
                     client.send(bytes("//CANNOT ADD FRIEND", "utf8"))
                 else:
-                    updateFriends(name, msg[20:len(msg)].decode("utf8"))
+                    #updateFriends(name, msg[20:len(msg)].decode("utf8"))
+                    updateFriends(name, msg[20:len(msg)].decode("utf8"), "ADD FRIEND")
                     onlineFlag = False
                     for people in clients:
                         if msg[20:len(msg)].decode("utf8") == clients[people]:
@@ -83,6 +84,15 @@ def handleClient(client):#handle client interaction
                         client.send(msg + bytes("0", "utf8"))
             else:
                 client.send(bytes("//CANNOT ADD FRIEND", "utf8"))
+        elif "//VERIFY DEL FRIEND:" in msg.decode("utf8"):  # user is attempting to delete friend
+            if checkUserName(msg[20:len(msg)].decode("utf8")):
+                if checkFriends(name, msg[20:len(msg)].decode("utf8")):
+                    updateFriends(name, msg[20:len(msg)].decode("utf8"), "DELETE")
+                    client.send(msg)
+                else:
+                    client.send(bytes("//CANNOT DEL FRIEND:", "utf8"))
+            else:
+                client.send(bytes("//CANNOT DEL FRIEND:", "utf8"))
         elif msg != bytes("//exit", "utf8"):
             broadcast(msg, name+": ")  # Send message to all other users
         else:  # user wishes to disconnect

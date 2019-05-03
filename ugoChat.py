@@ -33,16 +33,23 @@ class Ui_MainWindow(object):
 
 
         self.addFriend_LineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.addFriend_LineEdit.setGeometry(QtCore.QRect(0, 319, 120, 21))
+        self.addFriend_LineEdit.setGeometry(QtCore.QRect(0, 319, 99, 21))
         self.addFriend_LineEdit.setObjectName("addFriend_LineEdit")
         self.addFriend_LineEdit.setStyleSheet("background-color: rgb(147, 191, 242);")
+
         self.addFriend_Button = QtWidgets.QPushButton(self.centralwidget)
-        self.addFriend_Button.setGeometry(QtCore.QRect(120, 319, 21, 21))
+        self.addFriend_Button.setGeometry(QtCore.QRect(99, 319, 21, 21))
         self.addFriend_LineEdit.setText("")
         self.addFriend_LineEdit.setPlaceholderText("Add friend here...")
         self.addFriend_Button.setObjectName("addFriend_Button")
         self.addFriend_Button.setIcon(QIcon('addFriend.png'))
         self.addFriend_Button.setStyleSheet("background-color: rgb(74, 116, 138);")
+
+        self.delFriend_Button = QtWidgets.QPushButton(self.centralwidget)
+        self.delFriend_Button.setGeometry(QtCore.QRect(120, 319, 21, 21))
+        self.delFriend_Button.setObjectName("delFriend_Button")
+        self.delFriend_Button.setIcon(QIcon('delFriend.png'))
+        self.delFriend_Button.setStyleSheet("background-color: rgb(74, 116, 138);")
 
 
         palette = QtGui.QPalette()

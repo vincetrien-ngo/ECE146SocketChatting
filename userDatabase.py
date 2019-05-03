@@ -12,10 +12,14 @@ def friendsList(username):#function to create a friends list for every unique us
     connection.commit()
     connection.close()
 
-def updateFriends(username, newFriend):#update a users friends list
+#def updateFriends(username, newFriend):#update a users friends list
+def updateFriends(username, newFriend, action):#update a users friends list
     connection = sqlite3.connect(username + ".db")  #connect to database file
     checkFriends = connection.execute("SELECT friend FROM friends WHERE friend = ?",(newFriend,))
     if(checkFriends.fetchone()):
+        if "DELETE" in action:
+            connection.execute("DELETE FROM friends WHERE friend = ?", (newFriend,))
+            connection.commit()
         connection.close()
     else:
         connection.execute("INSERT INTO friends VALUES(?,?)",(newFriend, 0))
